@@ -117,13 +117,19 @@ class MinMaxHeap:
         ]
 
     def build_heap(self, nodes):
-        self.heap = []
+        self.heap = nodes[:]
+
+        # Heapify first
+        for i in range((len(self.heap) - 1) // 2, -1, -1):
+            if self.is_min_level(i):
+                self.trickle_down_min(i)
+            else:
+                self.trickle_down_max(i)
+
+        # Build fresh position map AFTER heapify
         self.position = {}
-
-        for node in nodes:
-            self.insert(node)
-            
-
+        for i, node in enumerate(self.heap):
+            self.position[node.id] = i
 
     def children(self, i):
         result = []
@@ -245,63 +251,62 @@ class MinMaxHeap:
 
         return maximum
 
-def delete_by_id(self, node_id):
-    if node_id not in self.position:
-        raise KeyError("Node not found")
+    def delete_by_id(self, node_id):
+        if node_id not in self.position:
+            raise KeyError("Node not found")
 
-    index = self.position[node_id]
-    deleted = self.heap[index]
+        index = self.position[node_id]
+        deleted = self.heap[index]
 
-    last = self.heap.pop()
-    del self.position[node_id]
+        last = self.heap.pop()
+        del self.position[node_id]
 
-    if index == len(self.heap):
+        if index == len(self.heap):
+            return deleted
+
+        self.heap[index] = last
+        self.position[last.id] = index
+
+        if index > 0:
+            parent = self.parent(index)
+
+            if self.is_min_level(index):
+                if self.heap[index].priority > self.heap[parent].priority:
+                    self.swap(index, parent)
+                    self.bubble_up_max(parent)
+                else:
+                    self.bubble_up_min(index)
+            else:
+                if self.heap[index].priority < self.heap[parent].priority:
+                    self.swap(index, parent)
+                    self.bubble_up_min(parent)
+                else:
+                    self.bubble_up_max(index)
+        else:
+            self.trickle_down_min(0)
+
         return deleted
 
-    self.heap[index] = last
-    self.position[last.id] = index
+    def update_priority(self, node_id, new_priority):
+        if node_id not in self.position:
+            raise KeyError("Node not found")
 
-    if index > 0:
-        parent = self.parent(index)
+        i = self.position[node_id]
+        old = self.heap[i].priority
+        self.heap[i].priority = new_priority
 
-        if self.is_min_level(index):
-            if self.heap[index].priority > self.heap[parent].priority:
-                self.swap(index, parent)
-                self.bubble_up_max(parent)
+        if new_priority < old:
+            if self.is_min_level(i):
+                self.bubble_up_min(i)
             else:
-                self.bubble_up_min(index)
+                p = self.parent(i)
+                if p >= 0 and self.heap[i].priority < self.heap[p].priority:
+                    self.swap(i, p)
+                    self.bubble_up_min(p)
         else:
-            if self.heap[index].priority < self.heap[parent].priority:
-                self.swap(index, parent)
-                self.bubble_up_min(parent)
+            if self.is_min_level(i):
+                self.trickle_down_min(i)
             else:
-                self.bubble_up_max(index)
-    else:
-        self.trickle_down_min(0)
+                self.trickle_down_max(i)
 
-    return deleted
-
-
-def update_priority(self, node_id, new_priority):
-    if node_id not in self.position:
-        raise KeyError("Node not found")
-
-    i = self.position[node_id]
-    old = self.heap[i].priority
-    self.heap[i].priority = new_priority
-
-    if new_priority < old:
-        if self.is_min_level(i):
-            self.bubble_up_min(i)
-        else:
-            p = self.parent(i)
-            if p >= 0 and self.heap[i].priority < self.heap[p].priority:
-                self.swap(i, p)
-                self.bubble_up_min(p)
-    else:
-        if self.is_min_level(i):
-            self.trickle_down_min(i)
-        else:
-            self.trickle_down_max(i)
-
-    return True
+        return True
