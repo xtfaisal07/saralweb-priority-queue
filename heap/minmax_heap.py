@@ -261,7 +261,6 @@ def delete_by_id(self, node_id):
     self.heap[index] = last
     self.position[last.id] = index
 
-    # Decide whether to bubble up or trickle down
     if index > 0:
         parent = self.parent(index)
 
@@ -282,25 +281,27 @@ def delete_by_id(self, node_id):
 
     return deleted
 
-    def update_priority(self, node_id, new_priority):
-        if node_id not in self.position:
-            raise KeyError("Node not found")
 
-        i = self.position[node_id]
-        old = self.heap[i].priority
+def update_priority(self, node_id, new_priority):
+    if node_id not in self.position:
+        raise KeyError("Node not found")
 
-        self.heap[i].priority = new_priority
+    i = self.position[node_id]
+    old = self.heap[i].priority
+    self.heap[i].priority = new_priority
 
-        if new_priority < old:
-            if self.is_min_level(i):
-                self.bubble_up_min(i)
-            else:
-                p = self.parent(i)
-                if p >= 0 and self.heap[i].priority < self.heap[p].priority:
-                    self.swap(i, p)
-                    self.bubble_up_min(p)
+    if new_priority < old:
+        if self.is_min_level(i):
+            self.bubble_up_min(i)
         else:
-            if self.is_min_level(i):
-                self.trickle_down_min(i)
-            else:
-                self.trickle_down_max(i)
+            p = self.parent(i)
+            if p >= 0 and self.heap[i].priority < self.heap[p].priority:
+                self.swap(i, p)
+                self.bubble_up_min(p)
+    else:
+        if self.is_min_level(i):
+            self.trickle_down_min(i)
+        else:
+            self.trickle_down_max(i)
+
+    return True
