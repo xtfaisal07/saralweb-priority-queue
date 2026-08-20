@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from pathlib import Path
 from database.db import Database
+from fastapi import HTTPException
 
 from module import PriorityQueue
 
@@ -18,7 +19,10 @@ def home():
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[
+    "http://localhost:5173",
+    "https://saralweb-pq-web.vercel.app",  # replace with your real Vercel URL later
+],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -80,18 +84,30 @@ def peek():
     }
 
 
+
+@app.post("/extract-min")
+def extract_min():
+    try:
+        node = pq.extract_min()
+        return {
+            "id": node.id,
+            "value": node.value,
+            "priority": node.priority
+        }
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    
 @app.post("/extract-max")
 def extract_max():
     try:
-        return pq.extract_max()
+        node = pq.extract_max()
+        return {
+            "id": node.id,
+            "value": node.value,
+            "priority": node.priority
+        }
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-
-
-@app.post("/extract-max")
-def extract_max():
-    node = pq.extract_max()
-    return node
 
 
 @app.put("/update/{node_id}")
@@ -100,7 +116,7 @@ def update(node_id: int, task: UpdateTask):
         pq.update(node_id, task.priority)
         return {"message": "updated"}
     except Exception as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.delete("/delete/{node_id}")
@@ -109,4 +125,4 @@ def delete(node_id: int):
         pq.delete(node_id)
         return {"message": "deleted"}
     except Exception as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e))
