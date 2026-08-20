@@ -58,19 +58,18 @@ class PriorityQueue:
     def display(self):
         return self.heap.display()
 
-def update(self, node_id, priority):
-    updated = self.heap.update_priority(node_id, priority)
+    def update(self, node_id, priority):
+        updated = self.heap.update_priority(node_id, priority)
 
-    if not updated:
-        raise Exception("Task not found")
+        if not updated:
+            raise Exception("Task not found")
 
-    self.repo.update(node_id, priority)
+        self.repo.update(node_id, priority)
 
+    def delete(self, node_id):
+        deleted = self.heap.delete_by_id(node_id)
 
-def delete(self, node_id):
-    deleted = self.heap.delete_by_id(node_id)
+        if not deleted:
+            raise Exception("Task not found")
 
-    if not deleted:
-        raise Exception("Task not found")
-
-    self.repo.delete(node_id)
+        self.repo.delete(node_id)
