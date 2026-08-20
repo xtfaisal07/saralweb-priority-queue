@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from pathlib import Path
+from database.db import Database
 
 from module import PriorityQueue
 
@@ -21,7 +23,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+def initialize_database():
+    db = Database()
 
+    schema_path = Path(__file__).parent / "database" / "schema.sql"
+
+    with open(schema_path, "r") as f:
+        db.execute(f.read())
+
+    db.close()
+
+
+initialize_database()
 pq = PriorityQueue()
 
 
